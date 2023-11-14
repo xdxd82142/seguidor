@@ -120,7 +120,7 @@ void movimiento_derecha(){
   digitalWrite(INB, velocidad);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  delay(tiempo_ejecucion);
+  delay(tiempo_ejecucion-100);
 
 }
 
@@ -129,7 +129,7 @@ void movimiento_izquierda(){
   digitalWrite(INA, velocidad);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
-  delay(tiempo_ejecucion);
+  delay(tiempo_ejecucion-100);
 
 }
 
