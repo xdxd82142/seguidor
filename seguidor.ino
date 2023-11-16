@@ -18,6 +18,7 @@ int tiempo_ejecucion = 5;
 int retraso = 1;
 int negro = 1;
 int blanco = 0;
+int movimiento_anterior = 0;
 
 // Variables para los sensores
 int valor_inicial_infrarojo_izq = 0;
@@ -55,42 +56,49 @@ void loop(){
     valor_inicial_infrarojo_med = digitalRead(infrarojo_medio);
     valor_inicial_infrarojo_lat_der = digitalRead(infrarojo_lateral_derecho);
     valor_inicial_infrarojo_lat_izq = digitalRead(infrarojo_lateral_izquierdo);
-
     
     if (valor_inicial_infrarojo_izq == blanco && valor_inicial_infrarojo_med == negro && valor_inicial_infrarojo_der == blanco){
       movimiento_delante();
+      movimiento_anterior = 1;
     }
-    else if (valor_inicial_infrarojo_izq == negro && valor_inicial_infrarojo_med == blanco && valor_inicial_infrarojo_der == negro){
+    else if (valor_inicial_infrarojo_izq == negro && (valor_inicial_infrarojo_med == blanco || valor_inicial_infrarojo_med == negro) && valor_inicial_infrarojo_der == negro){
       movimiento_delante();
-    }
-    else if (valor_inicial_infrarojo_izq == negro && valor_inicial_infrarojo_med == negro && valor_inicial_infrarojo_der == negro){
-      movimiento_delante();
+      movimiento_anterior = 1;
     }
     // Girar izquierda
-    else if ( valor_inicial_infrarojo_izq == blanco || valor_inicial_infrarojo_lat_izq == blanco && valor_inicial_infrarojo_med == negro && valor_inicial_infrarojo_der == negro){
+    else if ( (valor_inicial_infrarojo_izq == blanco || valor_inicial_infrarojo_lat_izq == blanco) && (valor_inicial_infrarojo_med == negro || valor_inicial_infrarojo_med == blanco) && (valor_inicial_infrarojo_der == negro || valor_inicial_infrarojo_lat_der == negro)){
       movimiento_derecha();
-    }
-    else if ( valor_inicial_infrarojo_izq == blanco || valor_inicial_infrarojo_lat_izq == blanco && valor_inicial_infrarojo_med == blanco && valor_inicial_infrarojo_der == negro){
-      movimiento_derecha();
+      movimiento_anterior = 2;
     }
     // Girar derecha
-    else if (valor_inicial_infrarojo_izq == negro && valor_inicial_infrarojo_med == blanco && valor_inicial_infrarojo_der == blanco || valor_inicial_infrarojo_lat_der == blanco){
+    else if ((valor_inicial_infrarojo_izq == negro || valor_inicial_infrarojo_lat_izq == negro) && (valor_inicial_infrarojo_med == blanco || valor_inicial_infrarojo_med == negro) && (valor_inicial_infrarojo_der == blanco || valor_inicial_infrarojo_lat_der == blanco)){
       movimiento_izquierda();
+      movimiento_anterior = 3;
     }
-    else if (valor_inicial_infrarojo_izq == negro && valor_inicial_infrarojo_med == negro && valor_inicial_infrarojo_der == blanco || valor_inicial_infrarojo_lat_der == blanco){
-      movimiento_izquierda();
-    }
+    // condicion para drift
     else if (valor_inicial_infrarojo_izq == blanco && valor_inicial_infrarojo_med == blanco && valor_inicial_infrarojo_der == blanco){
-      movimiento_delante();
+      if (movimiento_anterior == 1){
+        movimiento_delante();
+      }
+      else if (movimiento_anterior == 2){
+        movimiento_derecha();
+      }
+      else if (movimiento_anterior == 3){
+        movimiento_izquierda();
+      }
+      else if (movimiento_anterior == 0){
+        detenerse();
+      }
+      
+      
+    }
+    else {
+      detenerse();
+      movimiento_anterior = 0;
     }
 
 
-    if (valor_inicial_infrarojo_lat_izq == negro && valor_inicial_infrarojo_izq != negro){
-      movimiento_derecha();
-    }
-    if (valor_inicial_infrarojo_lat_der == negro && valor_inicial_infrarojo_der != negro){
-      movimiento_izquierda();
-    }
+    
   }
 
 }
@@ -146,7 +154,6 @@ void detenerse(){
   analogWrite(INB, 0);
   delay(retraso);
 }
-
 
 
 
